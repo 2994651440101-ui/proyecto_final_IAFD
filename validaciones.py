@@ -68,3 +68,10 @@ def validar_indice(texto, cantidad):
         raise ValueError("El registro seleccionado no existe.")
 
 return numero - 1
+
+
+
+
+dasfdfasdf
+
+#TERMINADO

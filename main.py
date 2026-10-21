@@ -6,3 +6,6 @@ if __name__ == "__main__":
         iniciar_programa()
     except(keyboardInterrupt, EOFError):
         print("\nPrograma finalizado.")
+        
+        
+#TERMINADO
