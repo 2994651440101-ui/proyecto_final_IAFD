@@ -1,11 +1,11 @@
+
+"""Punto de entrada de la aplicación."""
+
 from consola import iniciar_programa
 
 
 if __name__ == "__main__":
     try:
         iniciar_programa()
-    except(keyboardInterrupt, EOFError):
+    except (KeyboardInterrupt, EOFError):
         print("\nPrograma finalizado.")
-        
-        
-#TERMINADO
