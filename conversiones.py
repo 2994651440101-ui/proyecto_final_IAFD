@@ -1,73 +1,85 @@
-"""Algoritmos manuales de conversion de sistemas numericos.
+"""Algoritmos manuales: notación posicional y divisiones sucesivas.
 
-No usamos bin(), oct(), hex(), int(texto, base) ni formato de bases.
+Prohibido sustituirlos por bin(), oct(), hex(), int(texto, base),
+o formatos automáticos de cambio de base.
 """
 
 from validaciones import BASES, DIGITOS
 
 
-def a_decimal(texto, base):
-    """Aplica notacion posicional a un texto previamente validado."""
+def a_decimal(texto_validado, base):
+    """Calcula el valor decimal según el peso de cada posición.
+
+    El texto DEBE llegar validado; el orden de los pasos sigue el ejemplo
+    de la página 7 del enunciado: de derecha a izquierda (potencias 0, 1, ...).
+    """
     total = 0
     pasos = []
-
-    for posicion, caracter in enumerate(reversed(texto)):
-        valor = DIGITOS.index(caracter)
-        aporte = valor * (base ** posicion)
+    for posicion, caracter in enumerate(reversed(texto_validado)):
+        valor_digito = DIGITOS.index(caracter)
+        aporte = valor_digito * (base ** posicion)
         total += aporte
         pasos.append(
-            f"{caracter} (valor {valor}) x {base}^{posicion} = {aporte}"
+            f"{caracter} (valor {valor_digito}) x {base}^{posicion} = {aporte}"
         )
-
     pasos.append(f"Suma de los aportes: {total}")
     return total, pasos
 
 
 def desde_decimal(numero, base):
-    """Convierte un entero no negativo por divisiones sucesivas."""
+    """Convierte a base destino usando división entera y residuos."""
+    if numero < 0:
+        raise ValueError("Solo se admiten enteros no negativos.")
+    if base not in (2, 8, 10, 16):
+        raise ValueError("Base numérica no válida.")
     if numero == 0:
-        return "0", [
-            "El número es cero.",
-            "Su representación en la base de destino es 0.",
-        ]
+        return "0", ["El valor es 0; en la base de destino también es 0."]
 
-    resultado = ""
     pasos = []
-
-    while numero > 0:
-        cociente = numero // base
-        residuo = numero % base
-        simbolo = DIGITOS[residuo]
+    resultado = ""
+    actual = numero
+    while actual > 0:
+        cociente = actual // base
+        residuo = actual % base
+        digito = DIGITOS[residuo]
         pasos.append(
-            f"{numero} / {base}: cociente = {cociente}, "
-            f"residuo = {residuo}, dígito = {simbolo}"
+            f"{actual} / {base}: cociente = {cociente}, "
+            f"residuo = {residuo}, dígito = {digito}"
         )
-        resultado = simbolo + resultado
-        numero = cociente
-
-    pasos.append("Leer los residuos del último al primero: " + resultado)
+        resultado = digito + resultado
+        actual = cociente
+    pasos.append(f"Leer los residuos del último al primero: {resultado}")
     return resultado, pasos
 
 
 def convertir(texto_validado, origen, destino):
-    """Convierte un texto ya validado. Devuelve (resultado, pasos)."""
-    base_origen = BASES[origen]
-    base_destino = BASES[destino]
+    """Devuelve (texto_resultado, pasos) para dos bases distintas.
 
+    La entrada debe validarse previamente con validar_entrada().
+    """
+    if origen not in BASES or destino not in BASES or origen == destino:
+        raise ValueError("Las bases de origen y destino deben ser distintas y válidas.")
+
+    pasos = []
     if origen == "Decimal":
-        valor_decimal = int(texto_validado)
-        pasos_origen = [f"El número ya está en base decimal: {valor_decimal}."]
+        numero_decimal = int(texto_validado)
     else:
-        valor_decimal, pasos_origen = a_decimal(texto_validado, base_origen)
+        numero_decimal, detalle = a_decimal(texto_validado, BASES[origen])
+        if destino != "Decimal":
+            pasos.append(f"ETAPA 1: {origen.upper()} A DECIMAL")
+        else:
+            pasos.append(f"CONVERSIÓN: {origen.upper()} A DECIMAL")
+        pasos.extend(detalle)
 
     if destino == "Decimal":
-        resultado = str(valor_decimal)
-        pasos_destino = ["El resultado en base decimal es: " + resultado]
+        resultado = str(numero_decimal)
     else:
-        resultado, pasos_destino = desde_decimal(valor_decimal, base_destino)
+        resultado, detalle = desde_decimal(numero_decimal, BASES[destino])
+        if origen != "Decimal":
+            pasos.append(f"ETAPA 2: DECIMAL A {destino.upper()}")
+        else:
+            pasos.append(f"CONVERSIÓN: DECIMAL A {destino.upper()}")
+        pasos.extend(detalle)
 
-    pasos = [f"Paso 1: convertir desde {origen} a decimal."]
-    pasos.extend(pasos_origen)
-    pasos.append(f"Paso 2: convertir de decimal a {destino}.")
-    pasos.extend(pasos_destino)
+    pasos.append(f"Resultado final en {destino}: {resultado}")
     return resultado, pasos

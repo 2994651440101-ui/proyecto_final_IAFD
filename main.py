@@ -1,5 +1,4 @@
-
-"""Punto de entrada de la aplicación."""
+"""Archivo principal del Proyecto 2 de IAFD."""
 
 from consola import iniciar_programa
 
@@ -7,5 +6,5 @@ from consola import iniciar_programa
 if __name__ == "__main__":
     try:
         iniciar_programa()
-    except (KeyboardInterrupt, EOFError):
+    except (KeyboardInterrupt,EOFError):
         print("\nPrograma finalizado.")

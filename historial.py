@@ -1,14 +1,10 @@
-"""Historial en memoria para conversiones hechas desde el menú principal.
-
-Cada registro es un diccionario con numero, origen, destino y resultado.
-La lista se crea al iniciar el programa y se elimina al cerrarlo.
-"""
+"""Historial de conversiones válido solo durante la ejecución del programa."""
 
 from validaciones import validar_indice
 
 
 def registrar_conversion(historial, numero, origen, destino, resultado):
-    """Agrega una conversión válida; los ejercicios de práctica no usan esta función."""
+    """Almacena una conversión válida (nunca ejercicios de práctica)."""
     historial.append({
         "numero": numero,
         "origen": origen,
@@ -18,77 +14,73 @@ def registrar_conversion(historial, numero, origen, destino, resultado):
 
 
 def mostrar_historial(historial):
-    """Imprime los registros numerados empezando desde 1."""
-    print("\n=== HISTORIAL DE CONVERSIONES ===")
+    """Muestra registros numerados y su cantidad total como en la página 8."""
+    print("\n" + "=" * 55)
+    print("HISTORIAL DE CONVERSIONES")
+    print("=" * 55)
     if not historial:
         print("El historial está vacío.")
-        return
-
-    for numero_registro, registro in enumerate(historial, start=1):
-        print(
-            f"{numero_registro}. {registro['numero']} ({registro['origen']}) "
-            f"-> {registro['resultado']} ({registro['destino']})"
-        )
+    else:
+        for posicion, registro in enumerate(historial, 1):
+            print(f"\nRegistro {posicion}")
+            print(f"  Entrada: {registro['numero']}")
+            print(f"  Origen: {registro['origen']}")
+            print(f"  Destino: {registro['destino']}")
+            print(f"  Resultado: {registro['resultado']}")
+    print(f"\nTotal de registros: {len(historial)}")
 
 
 def eliminar_registro(historial):
-    """Solicita el número de registro y elimina solamente si es válido."""
+    """Elimina un registro tras validar su número."""
     if not historial:
-        print("El historial está vacío. No hay registros que eliminar.")
+        print("El historial está vacío. No hay registros para eliminar.")
         return
-
-    mostrar_historial(historial)
     while True:
-        seleccion = input("Número de registro que desea eliminar: ")
+        texto = input("Número del registro que desea eliminar: ")
         try:
-            indice = validar_indice(seleccion, len(historial))
+            indice = validar_indice(texto, len(historial))
         except ValueError as error:
             print(f"Error: {error}")
-        else:
-            eliminado = historial.pop(indice)
-            print(
-                f"Registro eliminado: {eliminado['numero']} "
-                f"({eliminado['origen']}) -> {eliminado['resultado']} "
-                f"({eliminado['destino']})."
-            )
-            return
+            continue
+        eliminado = historial.pop(indice)
+        print(
+            f"Registro eliminado: {eliminado['numero']} "
+            f"({eliminado['origen']}) -> {eliminado['resultado']} "
+            f"({eliminado['destino']})."
+        )
+        return
 
 
 def vaciar_historial(historial):
-    """Permite vaciar todo el historial con una confirmación explícita."""
+    """Vacía todos los registros tras una confirmación."""
     if not historial:
         print("El historial ya está vacío.")
         return
-
     while True:
-        respuesta = input("¿Desea eliminar TODOS los registros? (S/N): ").upper()
+        respuesta = input("¿Vaciar TODO el historial? (S/N): ").upper()
         if respuesta == "S":
             historial.clear()
             print("Historial vaciado correctamente.")
             return
         if respuesta == "N":
-            print("Operación cancelada. No se eliminó ningún registro.")
+            print("Vaciado cancelado.")
             return
-        print("Error: escriba S para confirmar o N para cancelar.")
+        print("Error: escriba S o N.")
 
 
 def menu_historial(historial):
-    """Administra el historial y permite volver al menú principal."""
+    """Presenta inmediatamente registros y las tres opciones del ejemplo."""
     while True:
-        print("\n=== MENÚ DE HISTORIAL ===")
-        print("1. Mostrar historial")
-        print("2. Eliminar un registro")
-        print("3. Vaciar historial")
-        print("4. Regresar al menú principal")
-
-        opcion = input("Seleccione una opción: ")
+        mostrar_historial(historial)
+        print("\n1. Eliminar un registro")
+        print("2. Vaciar historial")
+        print("3. Volver al menú principal")
+        opcion = input("Seleccione una opción: ").strip()
         if opcion == "1":
-            mostrar_historial(historial)
-        elif opcion == "2":
             eliminar_registro(historial)
-        elif opcion == "3":
+        elif opcion == "2":
             vaciar_historial(historial)
-        elif opcion == "4":
+        elif opcion == "3":
             return
         else:
-            print("Error: seleccione una opción del 1 al 4.")
+            print("Error: seleccione una opción del 1 al 3.")
