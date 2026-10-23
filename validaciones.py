@@ -1,7 +1,6 @@
-"""Validaciones del conversor de sistemas numéricos.
+"""Validación de enteros no negativos escritos en bases 2, 8, 10 o 16.
 
-Todas las entradas de números se validan como texto ANTES de convertirlas.
-Se admiten únicamente números enteros no negativos de hasta 128 dígitos.
+La validación se hace ANTES de cualquier conversión, sin quitar espacios.
 """
 
 BASES = {
@@ -10,59 +9,54 @@ BASES = {
     "Decimal": 10,
     "Hexadecimal": 16,
 }
-
 DIGITOS = "0123456789ABCDEF"
 MAX_DIGITOS = 128
 
 
 def validar_numero(texto, nombre_base):
-    """Devuelve el número normalizado a mayúsculas o lanza ValueError."""
+    """Devuelve el texto normalizado o lanza ValueError si no es válido."""
     if nombre_base not in BASES:
         raise ValueError("La base seleccionada no es válida.")
-
-    if texto == "":
-        raise ValueError("Debe ingresar un número; la entrada no puede estar vacía.")
-
+    if not texto:
+        raise ValueError("Debe ingresar un número; la entrada está vacía.")
     if len(texto) > MAX_DIGITOS:
         raise ValueError(f"Se admiten como máximo {MAX_DIGITOS} dígitos.")
 
     permitidos = DIGITOS[:BASES[nombre_base]]
-    texto_normalizado = texto.upper()
-    for caracter in texto_normalizado:
-        if caracter not in permitidos:
+    # Validar caracteres ORIGINALES para impedir equivalencias Unicode engañosas
+    # (por ejemplo, ligaduras que al pasarlas a mayúsculas producen dos letras).
+    permitidos_originales = permitidos
+    if nombre_base == "Hexadecimal":
+        permitidos_originales += "abcdef"
+    for caracter in texto:
+        if caracter not in permitidos_originales:
             raise ValueError(
-                f"El carácter {caracter!r} no es válido para {nombre_base}. "
-                f"Se permiten únicamente: {permitidos}."
+                f"El carácter {caracter!r} no es válido en {nombre_base}. "
+                f"Solo se permiten los dígitos: {permitidos}."
             )
-
-    return texto_normalizado
+    return texto.upper()
 
 
 def validar_entrada(texto, origen, destino):
-    """Comprueba que las bases sean diferentes y valida el número de origen."""
+    """Comprueba ambas bases y valida un número escrito en la base origen."""
     if origen not in BASES or destino not in BASES:
         raise ValueError("Seleccione bases de origen y destino válidas.")
-
     if origen == destino:
         raise ValueError("Las bases de origen y destino deben ser diferentes.")
-
     return validar_numero(texto, origen)
 
 
 def validar_indice(texto, cantidad):
-    """Devuelve índice de lista (desde cero) para un registro numerado desde uno."""
+    """Convierte un número de registro 1..N a índice 0..N-1."""
     if cantidad <= 0:
         raise ValueError("El historial está vacío.")
-
-    if texto == "" or any(caracter not in "0123456789" for caracter in texto):
+    if not texto or any(caracter not in '0123456789' for caracter in texto):
         raise ValueError("Ingrese un número de registro válido.")
-
-    normalizado = texto.lstrip("0") or "0"
-    if len(normalizado) > len(str(cantidad)):
+    # Evita transformar entradas absurdamente extensas a enteros.
+    sin_ceros = texto.lstrip('0') or '0'
+    if len(sin_ceros) > len(str(cantidad)):
         raise ValueError("El registro seleccionado no existe.")
-
-    numero = int(normalizado)
-    if numero < 1 or numero > cantidad:
+    numero = int(sin_ceros)
+    if not 1 <= numero <= cantidad:
         raise ValueError("El registro seleccionado no existe.")
-
     return numero - 1
