@@ -1,4 +1,4 @@
-"""Archivo principal del Proyecto 2 de IAFD."""
+"""Archivo principal del Proyecto 2 de IAFD"""
 
 from consola import iniciar_programa
 
